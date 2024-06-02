@@ -1,225 +1,205 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 
-namespace ToolVehicleTaxManagementSystemwithStaticProperties
+public abstract class ToolVehicle
 {
+    // Properties
+    public string RegNo { get; private set; }
+    public int VehicleID { get; private set; }
+    public string Model { get; private set; }
+    public string Brand { get; private set; }
+    public decimal BasePrice { get; private set; }
+    public string VehicleType { get; private set; }
 
-    public abstract class ToolVehicle
+    // Static Properties
+    public static int TotalVehicles { get; private set; }
+    public static int TotalTaxPayingVehicles { get; private set; }
+    public static int TotalNonTaxPayingVehicles { get; private set; }
+    public static decimal TotalTaxCollected { get; private set; }
+
+    // Constructor
+    public ToolVehicle(int vehicleID, string regNo, string model, string brand, decimal basePrice, string vehicleType)
     {
-        public int VehicleID { get; set; }
-        public string RegNo { get; set; }
-        public string Model { get; set; }
-        public string Brand { get; set; }
-        public decimal BasePrice { get; set; }
-        public string VehicleType { get; set; }
-
-        public static int TotalVehicles { get; private set; }
-        public static int TotalTaxPayingVehicles { get; private set; }
-        public static int TotalNonTaxPayingVehicles { get; private set; }
-        public static decimal TotalTaxCollected { get; private set; }
-
-        public ToolVehicle(int vehicleID, string regNo, string model, string brand, decimal basePrice, string vehicleType)
-        {
-            VehicleID = vehicleID;
-            RegNo = regNo;
-            Model = model;
-            Brand = brand;
-            BasePrice = basePrice;
-            VehicleType = vehicleType;
-            TotalVehicles++;
-        }
-
-        public abstract void PayTax();
-
-        public void PassWithoutPaying()
-        {
-            TotalNonTaxPayingVehicles++;
-        }
-
-        protected void UpdateTaxStatistics(decimal taxAmount)
-        {
-            TotalTaxCollected += taxAmount;
-            TotalTaxPayingVehicles++;
-        }
+        VehicleID = vehicleID;
+        RegNo = regNo;
+        Model = model;
+        Brand = brand;
+        BasePrice = basePrice;
+        VehicleType = vehicleType;
+        TotalVehicles++;
     }
 
-    public class Car : ToolVehicle
+    // Abstract Method
+    public abstract void PayTax();
+
+    // Method for Passing Without Paying Tax
+    public void PassWithoutPaying()
     {
-        private const decimal CarTaxAmount = 2.0m;
-
-        public Car(int vehicleID, string regNo, string model, string brand, decimal basePrice)
-            : base(vehicleID, regNo, model, brand, basePrice, "Car")
-        {
-        }
-
-        public override void PayTax()
-        {
-            UpdateTaxStatistics(CarTaxAmount);
-        }
+        TotalNonTaxPayingVehicles++;
     }
 
-    public class Bike : ToolVehicle
+    // Method to Update Tax Statistics
+    protected void UpdateTaxStatistics(decimal taxAmount)
     {
-        private const decimal BikeTaxAmount = 1.0m;
+        TotalTaxCollected += taxAmount;
+        TotalTaxPayingVehicles++;
+    }
+}
+public class Car : ToolVehicle
+{
+    private const decimal TaxAmount = 2m;
 
-        public Bike(int vehicleID, string regNo, string model, string brand, decimal basePrice)
-            : base(vehicleID, regNo, model, brand, basePrice, "Bike")
-        {
-        }
-
-        public override void PayTax()
-        {
-            UpdateTaxStatistics(BikeTaxAmount);
-        }
+    public Car(int vehicleID, string regNo, string model, string brand, decimal basePrice)
+        : base(vehicleID, regNo, model, brand, basePrice, "Car")
+    {
     }
 
-    public class HeavyVehicle : ToolVehicle
+    public override void PayTax()
     {
-        private const decimal HeavyVehicleTaxAmount = 4.0m;
+        UpdateTaxStatistics(TaxAmount);
+    }
+}
 
-        public HeavyVehicle(int vehicleID, string regNo, string model, string brand, decimal basePrice)
-            : base(vehicleID, regNo, model, brand, basePrice, "HeavyVehicle")
-        {
-        }
+public class Bike : ToolVehicle
+{
+    private const decimal TaxAmount = 1m;
 
-        public override void PayTax()
-        {
-            UpdateTaxStatistics(HeavyVehicleTaxAmount);
-        }
+    public Bike(int vehicleID, string regNo, string model, string brand, decimal basePrice)
+        : base(vehicleID, regNo, model, brand, basePrice, "Bike")
+    {
     }
 
-    class Program
+    public override void PayTax()
     {
-        static List<ToolVehicle> vehicles = new List<ToolVehicle>();
+        UpdateTaxStatistics(TaxAmount);
+    }
+}
 
-        static void Main(string[] args)
+public class HeavyVehicle : ToolVehicle
+{
+    private const decimal TaxAmount = 4m;
+
+    public HeavyVehicle(int vehicleID, string regNo, string model, string brand, decimal basePrice)
+        : base(vehicleID, regNo, model, brand, basePrice, "HeavyVehicle")
+    {
+    }
+
+    public override void PayTax()
+    {
+        UpdateTaxStatistics(TaxAmount);
+    }
+}
+
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        List<ToolVehicle> vehicles = new List<ToolVehicle>();
+        int vehicleCounter = 1;
+
+        while (true)
         {
-            while (true)
+            Console.WriteLine("Welcome to the Tool Vehicle Tax Management System");
+            Console.WriteLine("1. Add a Car");
+            Console.WriteLine("2. Add a Bike");
+            Console.WriteLine("3. Add a Heavy Vehicle");
+            Console.WriteLine("4. Pass a Vehicle Without Paying Tax");
+            Console.WriteLine("5. Generate Report");
+            Console.WriteLine("6. Exit");
+
+            Console.Write("Enter your choice: ");
+            if (!int.TryParse(Console.ReadLine(), out int choice))
             {
-                ShowMenu();
-                int choice = GetUserChoice();
-
-                switch (choice)
-                {
-                    case 1:
-                        CreateVehicle();
-                        break;
-                    case 2:
-                        PayTax();
-                        break;
-                    case 3:
-                        PassWithoutPaying();
-                        break;
-                    case 4:
-                        PrintStatistics();
-                        break;
-                    case 5:
-                        Console.WriteLine("\nExiting... \n");
-                        return;
-                    default:
-                        Console.WriteLine("Invalid choice. Please try again.");
-                        break;
-                }
+                Console.WriteLine("Invalid input. Please enter a number between 1 and 6.");
+                continue;
             }
-        }
 
-        static void ShowMenu()
-        {
-            Console.WriteLine("Vehicle Tax Management System \n");
-            Console.WriteLine("1. Create a new vehicle");
-            Console.WriteLine("2. Pay tax for a vehicle");
-            Console.WriteLine("3. Pass without paying tax for a vehicle");
-            Console.WriteLine("4. Print report of statistics");
-            Console.WriteLine("5. Exit");
-            Console.Write("\n Enter your choice: ");
-        }
-
-        static int GetUserChoice()
-        {
-            if (int.TryParse(Console.ReadLine(), out int choice))
+            switch (choice)
             {
-                return choice;
-            }
-            return -1;
-        }
-
-        static void CreateVehicle()
-        {
-            Console.Write("\nEnter vehicle type (Car/Bike/HeavyVehicle):");
-            string type = Console.ReadLine();
-            Console.Write("\nEnter Vehicle ID: ");
-            int vehicleID = int.Parse(Console.ReadLine());
-            Console.Write("Enter Registration Number: ");
-            string regNo = Console.ReadLine();
-            Console.Write("Enter Model: ");
-            string model = Console.ReadLine();
-            Console.Write("Enter Brand: ");
-            string brand = Console.ReadLine();
-            Console.Write("Enter Base Price: ");
-            decimal basePrice = decimal.Parse(Console.ReadLine() + "\n");
-
-            ToolVehicle vehicle;
-            switch (type.ToLower())
-            {
-                case "car":
-                    vehicle = new Car(vehicleID, regNo, model, brand, basePrice);
+                case 1:
+                    vehicles.Add(CreateVehicle(vehicleCounter++, "Car"));
                     break;
-                case "bike":
-                    vehicle = new Bike(vehicleID, regNo, model, brand, basePrice);
+                case 2:
+                    vehicles.Add(CreateVehicle(vehicleCounter++, "Bike"));
                     break;
-                case "heavyvehicle":
-                    vehicle = new HeavyVehicle(vehicleID, regNo, model, brand, basePrice);
+                case 3:
+                    vehicles.Add(CreateVehicle(vehicleCounter++, "HeavyVehicle"));
                     break;
-                default:
-                    Console.WriteLine("Invalid vehicle type. Vehicle not created.");
+                case 4:
+                    PassVehicleWithoutPaying(vehicles);
+                    break;
+                case 5:
+                    GenerateReport();
+                    break;
+                case 6:
                     return;
+                default:
+                    Console.WriteLine("Invalid choice. Please try again.");
+                    break;
             }
-            vehicles.Add(vehicle);
-            Console.WriteLine($"\n{type} created successfully.\n");
-        }
 
-        static void PayTax()
-        {
-            ToolVehicle vehicle = GetVehicleByID();
-            if (vehicle != null)
-            {
-                vehicle.PayTax();
-                Console.WriteLine("Tax paid successfully.");
-            }
-            else
-            {
-                Console.WriteLine("\nVehicle not found.\n");
-            }
-        }
-
-        static void PassWithoutPaying()
-        {
-            ToolVehicle vehicle = GetVehicleByID();
-            if (vehicle != null)
-            {
-                vehicle.PassWithoutPaying();
-                Console.WriteLine("Vehicle passed without paying tax.");
-            }
-            else
-            {
-                Console.WriteLine("\nVehicle not found.\n");
-            }
-        }
-
-        static ToolVehicle GetVehicleByID()
-        {
-            Console.Write("\nEnter Vehicle ID: ");
-            int vehicleID = int.Parse(Console.ReadLine());
-            return vehicles.Find(v => v.VehicleID == vehicleID);
-        }
-
-        static void PrintStatistics()
-        {
-            Console.WriteLine($"\nTotal Vehicles: {ToolVehicle.TotalVehicles}");
-            Console.WriteLine($"Total Tax Paying Vehicles: {ToolVehicle.TotalTaxPayingVehicles}");
-            Console.WriteLine($"Total Non-Tax Paying Vehicles: {ToolVehicle.TotalNonTaxPayingVehicles}");
-            Console.WriteLine($"Total Tax Collected: {ToolVehicle.TotalTaxCollected:C}\n");
+            Console.WriteLine();
         }
     }
 
+    static ToolVehicle CreateVehicle(int vehicleID, string vehicleType)
+    {
+        Console.Write("Enter Registration Number: ");
+        string regNo = Console.ReadLine();
+
+        Console.Write("Enter Model: ");
+        string model = Console.ReadLine();
+
+        Console.Write("Enter Brand: ");
+        string brand = Console.ReadLine();
+
+        Console.Write("Enter Base Price: ");
+        if (!decimal.TryParse(Console.ReadLine(), out decimal basePrice))
+        {
+            Console.WriteLine("Invalid input for base price. Setting to 0.");
+            basePrice = 0;
+        }
+
+        switch (vehicleType)
+        {
+            case "Car":
+                return new Car(vehicleID, regNo, model, brand, basePrice);
+            case "Bike":
+                return new Bike(vehicleID, regNo, model, brand, basePrice);
+            case "HeavyVehicle":
+                return new HeavyVehicle(vehicleID, regNo, model, brand, basePrice);
+            default:
+                throw new ArgumentException("Invalid vehicle type");
+        }
+    }
+
+    static void PassVehicleWithoutPaying(List<ToolVehicle> vehicles)
+    {
+        Console.Write("Enter Vehicle ID to pass without paying tax: ");
+        if (!int.TryParse(Console.ReadLine(), out int vehicleID))
+        {
+            Console.WriteLine("Invalid input. Please enter a valid vehicle ID.");
+            return;
+        }
+
+        ToolVehicle vehicle = vehicles.Find(v => v.VehicleID == vehicleID);
+        if (vehicle != null)
+        {
+            vehicle.PassWithoutPaying();
+            Console.WriteLine($"Vehicle {vehicleID} has passed without paying tax.");
+        }
+        else
+        {
+            Console.WriteLine("Vehicle not found.");
+        }
+    }
+
+    static void GenerateReport()
+    {
+        Console.WriteLine("Report:");
+        Console.WriteLine($"Total Vehicles: {ToolVehicle.TotalVehicles}");
+        Console.WriteLine($"Total Tax Paying Vehicles: {ToolVehicle.TotalTaxPayingVehicles}");
+        Console.WriteLine($"Total Non-Tax Paying Vehicles: {ToolVehicle.TotalNonTaxPayingVehicles}");
+        Console.WriteLine($"Total Tax Collected: {ToolVehicle.TotalTaxCollected:C}");
+    }
 }
